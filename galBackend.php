@@ -41,8 +41,8 @@ if (!empty($_FILES)) {
         imagejpeg($image, $tempFile, 90);
     }
 	//get lat/log
-	$lon = gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']);
-	$lat = gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
+	$lon = round(gps($exif["GPSLongitude"], $exif['GPSLongitudeRef']),4);
+	$lat = round(gps($exif["GPSLatitude"], $exif['GPSLatitudeRef']),6);
     $targetPath = dirname( __FILE__ ) . $ds. $storeFolder . $ds;
     $targetFile =  $targetPath. $_FILES['file']['name'];
 	//save file to disk
