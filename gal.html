@@ -2,11 +2,15 @@
 
 <html>
 <head>
-    <link href="dropzone.css" type="text/css" rel="stylesheet" />
-    <link href="/style.css" type="text/css" rel="stylesheet" />
-    <script src="dropzone.js"></script>
+    <link href="/work/htdocs/css/dropzone.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+       <script src="/work/htdocs/js/dropzone.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
     <style>
+        #ui-datepicker-div {
+			z-index: 1010 !important;
+		}
         .latLon {
             text-align: center;
         }
@@ -45,10 +49,13 @@
             APRFC Image Gallery
         </div>
         <div id="selector">
-            
+            Event: <input id="event" type="text" name="event"><br>
+            Date: <input id="date" type="text" name="date"><br>
         </div>
         <div id="gallery">
-            <form id="dz" action="galBackend.php" class="dropzone"></form>
+            <form id="dz" action="galBackend.php" class="dropzone">
+                
+            </form>
         </div>
         
     </div>
@@ -56,12 +63,14 @@
             
         </div>
     <script>
+        $.datepicker.setDefaults({dateFormat: 'yy-mm-dd' });
+        $("#date").datepicker();
         Dropzone.options.dz = {
             paramName: "file", // The name that will be used to transfer the file
             maxFilesize: 2, // MB
             acceptedFiles: "image/*",
             accept: function(file, done) {
-                console.log(file);
+                //console.log(file);
                 done();
             },
             init: function() {
@@ -73,8 +82,22 @@
                         //thisDropzone.options.thumbnail.call(thisDropzone, mockFile, "uploads/"+value.name);
                         thisDropzone.createThumbnailFromUrl(mockFile, "uploads/"+value.name);
                         thisDropzone.emit("complete", mockFile);
+                        console.log("Incoming saved file data:");
+                        console.log(value);
+                        
                     });
                      
+                });
+                thisDropzone.on("sending", function(file, xhr, formData) {
+                    var event = $("#event").val();
+                    var date = $("#date").val();
+                    formData.append("filesize", file.size);
+                    formData.append("event", event);
+                    formData.append("date", date);
+                    //// Display the key/value pairs
+                    //for (var pair of formData.entries()) {
+                    //    console.log(pair[0]+ ', ' + pair[1]); 
+                    //}
                 });
                 this.on("success", function(file, responseText) {
                     //file.previewTemplate.appendChild(document.createTextNode(responseText));
@@ -82,7 +105,8 @@
                     var mockFile = { name: file.name, size: file.size };
                     mydropzone.createThumbnailFromUrl(mockFile, "uploads/"+file.name);
                     //mydropzone.emit("thumbnail", file, "uploads/"+file.name);
-                    $(".dz-success").append('<div class="latLon">'+responseText+'</div>');
+                    //$(".dz-success").append('<div class="latLon">'+responseText+'</div>');
+                    console.log(responseText);
                 });
             }
         };
