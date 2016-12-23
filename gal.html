@@ -2,12 +2,15 @@
 
 <html>
 <head>
-    <link href="/work/htdocs/css/dropzone.css" type="text/css" rel="stylesheet" />
+    <link href="/css/dropzone.css" type="text/css" rel="stylesheet" />
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
-       <script src="/work/htdocs/js/dropzone.js"></script>
+       <script src="/js/dropzone.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
     <style>
+		body {
+			font-family: sans-serif;
+		}
         #ui-datepicker-div {
 			z-index: 1010 !important;
 		}
@@ -20,16 +23,20 @@
         #header {
             width: 100%;
             height: 50px;
-            border: dashed 1px;
         }
         #selector {
              width: 100%;
             height: 100px;
-            border: dashed 1px;
         }
+		#fields {
+			float: left;
+		}
+		.dropzone-preview {
+			float: left;
+		}
         #gallery {
             
-            border: dashed 1px;
+
         }
         #map {
             display: none;
@@ -46,16 +53,23 @@
 <body>
     <div id="container">
         <div id="header">
-            APRFC Image Gallery
+            <h2>APRFC Image Gallery</h2>
         </div>
         <div id="selector">
-            Event: <input id="event" type="text" name="event"><br>
-            Date: <input id="date" type="text" name="date"><br>
+			
+			<form id="dz" action="galBackend.php" class="dropzone">
+				<label for="event">Event: </label> 
+				<input id="event" type="text" name="event">
+
+				<label for="date">Date: </label> 
+				<input id="date" type="text" name="date"><button type="submit">Submit data and files!</button>
+				<hr>
+				<div class="dropzone-previews"></div>
+				
+            </form>
         </div>
         <div id="gallery">
-            <form id="dz" action="galBackend.php" class="dropzone">
-                
-            </form>
+            
         </div>
         
     </div>
@@ -66,14 +80,28 @@
         $.datepicker.setDefaults({dateFormat: 'yy-mm-dd' });
         $("#date").datepicker();
         Dropzone.options.dz = {
+			autoProcessQueue: false,
+			uploadMultiple: true,
+			parallelUploads: 100,
+			maxFiles: 100,
             paramName: "file", // The name that will be used to transfer the file
             maxFilesize: 2, // MB
             acceptedFiles: "image/*",
             accept: function(file, done) {
+				arrValidate = ["event", "date"];
+				var field, i ;
+				for (i=0; i<arrValidate.length; i++){
+					field = arrValidate[i];
+					if ( $('#'+field).val() === '') {
+						alert('Please complete all fields. You missed the [' +field+ '] field.');
+						return false;
+					}
+				}
                 //console.log(file);
                 done();
             },
             init: function() {
+				this.on("error", function(file){if (!file.accepted) this.removeFile(file);});
                 thisDropzone = this;
                 $.get('galBackend.php', function(data) {
                     $.each(data, function(key,value){
@@ -91,13 +119,19 @@
                 thisDropzone.on("sending", function(file, xhr, formData) {
                     var event = $("#event").val();
                     var date = $("#date").val();
+					arrValidate = ["event", "date"];
+					var field, i ;
+					for (i=0; i<arrValidate.length; i++){
+						field = arrValidate[i];
+						if ( $('#'+field).val() === '') {
+							alert('Please complete all fields. You missed the [' +field+ '] field.');
+							return false;
+						}
+					}
                     formData.append("filesize", file.size);
                     formData.append("event", event);
                     formData.append("date", date);
-                    //// Display the key/value pairs
-                    //for (var pair of formData.entries()) {
-                    //    console.log(pair[0]+ ', ' + pair[1]); 
-                    //}
+
                 });
                 this.on("success", function(file, responseText) {
                     //file.previewTemplate.appendChild(document.createTextNode(responseText));

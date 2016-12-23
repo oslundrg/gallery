@@ -66,6 +66,7 @@ if (!empty($_FILES)) {
 	$point->geometry = new stdClass();
 	$point->geometry->type = "Point";
 	$point->geometry->coordinates = array( $lon, $lat);
+	$point->properties = new stdClass();
 	$point->properties->event = $event;
 	$point->properties->date = $date;
 	//$newGeoJSON->features[] = $point;
